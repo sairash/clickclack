@@ -144,10 +144,10 @@ func CreateSound(config *Config) {
 						}
 					}
 				}
-				fmt.Printf("Current key %d\n", event.Rawcode)
+				// fmt.Printf("Current key %d\n", event.Rawcode)
 
 			} else if event.Kind == hook.MouseDown {
-				fmt.Printf("Mouse clicked: %v\n", event.Button)
+				// fmt.Printf("Mouse clicked: %v\n", event.Button)
 
 				switch event.Button {
 				case 3:
