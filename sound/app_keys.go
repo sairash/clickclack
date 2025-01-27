@@ -1,4 +1,4 @@
-package main
+package sound
 
 var appMap = map[uint16]string{
 	'D':   "32",
