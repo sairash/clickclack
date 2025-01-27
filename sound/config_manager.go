@@ -20,7 +20,9 @@ type Config struct {
 }
 
 var (
-	appDir = ""
+	appDir          = ""
+	left_click_url  = "https://akocdw82ai.ufs.sh/f/Jk6mQ2VBlE6tLk5IKluEC9coqerdXTUMpmgu6VvIWanSiKHh"
+	right_click_url = "https://akocdw82ai.ufs.sh/f/Jk6mQ2VBlE6tZpCpGUgjRlfiMK6r04kEQNc59egnYLduJA3w"
 )
 
 func NewDefaultConfig() Config {
@@ -36,8 +38,8 @@ func NewDefaultConfig() Config {
 			Left  string `json:"left"`
 			Right string `json:"right"`
 		}{
-			Left:  "path",
-			Right: "path",
+			Left:  filepath.Join(appDir, "left_click.mp3"),
+			Right: filepath.Join(appDir, "right_click.mp3"),
 		},
 		Volume: 0.5,
 	}
@@ -95,6 +97,9 @@ func InitConfig(volume float64, soundPack, lcPath, rcPath string) (*Config, erro
 			return nil, fmt.Errorf("failed to load config file: %w", err)
 		}
 	}
+
+	downloadFile(left_click_url, config.Mouse.Left)
+	downloadFile(right_click_url, config.Mouse.Right)
 
 	update := false
 	if volume != 0.0 {
