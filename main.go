@@ -4,10 +4,13 @@ import (
 	"clickclack/sound"
 	"flag"
 	"log"
+	"os"
+	"os/signal"
+
+	hook "github.com/robotn/gohook"
 )
 
 func main() {
-
 	var soundPackID string
 	var clickLeft string
 	var clickRight string
@@ -23,10 +26,15 @@ func main() {
 		log.Fatalf("Volume must be between 0.0 and 1.0")
 	}
 
+	signal.Notify(sound.SigChan, os.Interrupt)
+
 	conf, err := sound.InitConfig(volume, soundPackID, clickLeft, clickRight)
 	if err != nil {
 		panic(err)
 	}
 
-	sound.CreateSound(conf)
+	eventChan := hook.Start()
+	defer hook.End()
+
+	sound.CreateSound(conf, eventChan)
 }

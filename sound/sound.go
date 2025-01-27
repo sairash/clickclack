@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"time"
 
@@ -30,10 +29,10 @@ type SoundPack struct {
 }
 
 var (
-	already_pressed = map[uint16]bool{}
+	SigChan = make(chan os.Signal)
 )
 
-func CreateSound(config *Config) {
+func CreateSound(config *Config, eventChan chan hook.Event) {
 	data_path := filepath.Join(appDir, "data")
 	soundPackUrls := []string{
 		fmt.Sprintf("https://mechvibes.com/sound-packs/sound-pack-%s", config.Keyboard.ID),
@@ -103,15 +102,11 @@ func CreateSound(config *Config) {
 	sr := beep.SampleRate(44100)
 	speaker.Init(sr, sr.N(time.Second/10))
 
-	eventChan := hook.Start()
-	defer hook.End()
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt)
-
 	fmt.Printf("Listening for keyboard and mouse events...\n")
 	fmt.Printf("Sound pack ID: %s\n", config.Keyboard.ID)
 	fmt.Printf("Volume: %.2f\n", config.Volume)
+
+	already_pressed := map[uint16]bool{}
 
 	for {
 		select {
@@ -159,9 +154,10 @@ func CreateSound(config *Config) {
 			} else if event.Kind == hook.KeyUp {
 				already_pressed[event.Rawcode] = false
 			}
-		case <-sigChan:
+		case <-SigChan:
 			fmt.Println("Exiting...")
 			return
+
 		}
 	}
 }
