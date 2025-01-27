@@ -35,6 +35,10 @@ var (
 )
 
 func main() {
+	err := defaultInit()
+	if err != nil {
+		panic(err)
+	}
 	var soundPackID string
 	var volume float64
 
