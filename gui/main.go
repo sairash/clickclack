@@ -102,6 +102,35 @@ func main() {
 	myApp.Settings().SetTheme(&CustomTheme{})
 	window := myApp.NewWindow("Vibrant Typing Sound Generator")
 
+	textArea := widget.NewMultiLineEntry()
+	textArea.SetPlaceHolder("Info from clickclack is shown here")
+	textArea.Wrapping = fyne.TextWrapWord
+	textArea.Disable()
+	textArea.TextStyle.Monospace = true
+
+	var startButton *widget.Button
+	startButton = widget.NewButtonWithIcon("Start", theme.MediaPlayIcon(), func() {
+
+		startButton.SetText("Staring")
+		startButton.SetIcon(theme.MediaFastForwardIcon())
+		// startButton.SetIcon(theme.MediaMusicIcon())
+		textArea.Append("Progress Bar shown \n")
+
+		// conf, err := sound.InitConfig(volumeSlider.Value/100, selected_dropdown_value, browse_path_value[0], browse_path_value[1])
+
+		// go sound.CreateSound(conf, eventChan)
+		go func() {
+			time.Sleep(20 * time.Second)
+
+			// sound.Exit <- true
+
+			textArea.Append("Progress Bar hidden \n")
+
+		}()
+	})
+
+	startButton.Importance = widget.HighImportance
+
 	// Gradient background
 	gradient := canvas.NewRadialGradient(gradientCenter, gradientEdge)
 	gradient.CenterOffsetX = 0.5
@@ -131,6 +160,10 @@ func main() {
 	// Soundpack dropdown
 	dropdown := widget.NewSelect(soundPacks, func(s string) {
 
+		if startButton.Text != "Start" {
+			startButton.SetText("Restart")
+			startButton.Refresh()
+		}
 		// selected_dropdown_value = strings.Split(s, "sound-pack-")[1]
 	})
 	dropdown.PlaceHolder = "Choose Soundpack"
@@ -148,6 +181,11 @@ func main() {
 				}
 
 				browse_path_value[index] = reader.URI().Path()
+
+				if startButton.Text != "Start" {
+					startButton.SetText("Restart")
+					startButton.Refresh()
+				}
 
 				// Update button text with filename
 				fileName := filepath.Base(reader.URI().Path())
@@ -193,53 +231,14 @@ func main() {
 	volumeSlider.Orientation = widget.Horizontal
 
 	volumeSlider.OnChanged = func(value float64) {
+		if startButton.Text != "Start" {
+			startButton.SetText("Restart")
+			startButton.Refresh()
+		}
 		volumeValue.SetText(fmt.Sprintf("%d%%", int(value)))
 	}
 
-	textArea := widget.NewMultiLineEntry()
-	textArea.SetPlaceHolder("Info From ClickClack is shown here")
-	textArea.Wrapping = fyne.TextWrapWord
-	textArea.Disable()
-	textArea.TextStyle.Monospace = true
-
-	infoContainer := container.NewStack(
-		canvas.NewRectangle(vividBlue),
-		container.NewVBox(
-			widget.NewLabelWithStyle("Info: Stop the program to Apply changes", fyne.TextAlignCenter, fyne.TextStyle{Bold: false}),
-		),
-	)
-
-	infoContainer.Hide()
-
-	// Full-width progress bar
-	progress := widget.NewProgressBarInfinite()
-	progress.Hide()
-	progress.Resize(fyne.NewSize(380, 10))
-
 	fileButtons.Layout = layout.NewGridLayout(2)
-
-	startButton := widget.NewButtonWithIcon("Start", theme.MediaPlayIcon(), func() {
-
-		textArea.Append("Progress Bar shown \n")
-		infoContainer.Hide()
-		progress.Show()
-
-		// conf, err := sound.InitConfig(volumeSlider.Value/100, selected_dropdown_value, browse_path_value[0], browse_path_value[1])
-
-		// go sound.CreateSound(conf, eventChan)
-		go func() {
-			time.Sleep(20 * time.Second)
-			progress.Hide()
-
-			// sound.Exit <- true
-
-			infoContainer.Show()
-			textArea.Append("Progress Bar hidden \n")
-
-		}()
-	})
-
-	startButton.Importance = widget.HighImportance
 
 	footerText := widget.NewRichTextFromMarkdown(
 		`Created with ❤️ by [Sairash](sairashgautam.com.np)`,
@@ -269,9 +268,7 @@ func main() {
 		fileButtons,
 		volumeLabelRow,
 		volumeSlider,
-		infoContainer,
 		layout.NewSpacer(), // Space before start button
-		progress,           // Full-width progress (not centered)
 		textArea,
 		container.NewStack(startButton),
 	)
@@ -292,3 +289,29 @@ func main() {
 	window.Resize(fyne.NewSize(420, 590))
 	window.ShowAndRun()
 }
+
+// func (a *App) runCLICommand(value int) {
+// 	// Determine CLI path based on OS
+// 	cliPath := "./" + cliName
+// 	if runtime.GOOS == "windows" {
+// 		cliPath += ".exe"
+// 	}
+
+// 	// Create command
+// 	cmd := exec.Command(cliPath, "-v", fmt.Sprintf("%d", value))
+
+// 	// Capture output
+// 	var out bytes.Buffer
+// 	cmd.Stdout = &out
+// 	cmd.Stderr = &out
+
+// 	// Run command
+// 	err := cmd.Run()
+// 	if err != nil {
+// 		a.output.SetText(fmt.Sprintf("Error: %v\n%s", err, out.String()))
+// 		return
+// 	}
+
+// 	// Update GUI
+// 	a.output.SetText(out.String())
+// }
